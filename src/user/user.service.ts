@@ -5,16 +5,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
+import { SearchUserDto } from './dto/search-user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
-    private reposiroty: Repository<UserEntity>,
+    private repository: Repository<UserEntity>,
   ) {}
 
   create(dto: CreateUserDto) {
-    return this.reposiroty.save(dto);
+    return this.repository.save(dto);
   }
 
   findAll() {
@@ -22,18 +23,41 @@ export class UserService {
   }
 
   findById(id: any) {
-    return this.reposiroty.findOne(id);
+    return this.repository.findOne(id);
   }
 
   findByCond(cond: any) {
-    return this.reposiroty.findOne(cond);
+    return this.repository.findOne(cond);
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  update(id: number, dto: UpdateUserDto) {
+    return this.repository.update(id, dto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async search(dto: SearchUserDto) {
+    const qb = this.repository.createQueryBuilder('u');
+
+    qb.limit(dto.limit || 0);
+    qb.take(dto.take || 10);
+
+    if (dto.fullName) {
+      qb.andWhere(`u.fullName ILIKE :fullName`);
+    }
+
+    if (dto.email) {
+      qb.andWhere(`u.email ILIKE :email`);
+    }
+
+    qb.setParameters({
+      fullName: `%${dto.fullName}% `,
+      email: `%${dto.email}% `,
+    });
+
+    const [items, total] = await qb.getManyAndCount();
+
+    return {
+      items,
+      total,
+    };
   }
 }

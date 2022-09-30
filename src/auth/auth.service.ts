@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/user.service';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -24,12 +23,28 @@ export class AuthService {
     return null;
   }
 
+  generateJwt(data: { id: number; email: string }) {
+    const payload = { email: data.email, sub: data.id };
+    return this.jwtService.sign(payload);
+  }
+
   async login(user: UserEntity) {
     const { password, ...userData } = user;
-    const payload = { email: user.email, sub: user.id };
     return {
       ...userData,
-      access_token: this.jwtService.sign(payload),
+      token: this.generateJwt(userData),
     };
+  }
+
+  async register(dto: CreateUserDto) {
+    try {
+      const { password, ...userData } = await this.userService.create(dto);
+      return {
+        ...userData,
+        token: this.generateJwt(userData),
+      };
+    } catch {
+      throw new ForbiddenException();
+    }
   }
 }
