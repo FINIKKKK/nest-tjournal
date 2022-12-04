@@ -23,7 +23,7 @@ export class AuthService {
     return null;
   }
 
-  generateJwt(data: { id: number; email: string }) {
+  generateJwtToken(data: { id: number; email: string }) {
     const payload = { email: data.email, sub: data.id };
     return this.jwtService.sign(payload);
   }
@@ -32,19 +32,23 @@ export class AuthService {
     const { password, ...userData } = user;
     return {
       ...userData,
-      token: this.generateJwt(userData),
+      token: this.generateJwtToken(userData),
     };
   }
 
   async register(dto: CreateUserDto) {
     try {
-      const { password, ...userData } = await this.userService.create(dto);
+      const { password, ...userData } = await this.userService.create({
+        email: dto.email,
+        fullName: dto.fullName,
+        password: dto.password,
+      });
       return {
         ...userData,
-        token: this.generateJwt(userData),
+        token: this.generateJwtToken(userData),
       };
-    } catch {
-      throw new ForbiddenException();
+    } catch (err) {
+      throw new ForbiddenException('Ошибка при регистрации');
     }
   }
 }

@@ -19,15 +19,17 @@ export class UserService {
   }
 
   findAll() {
-    return `This action returns all user`;
+    return this.repository.find();
   }
 
-  findById(id: any) {
-    return this.repository.findOne(id);
+  findById(id: number) {
+    return this.repository.findOne({ where: { id } });
   }
 
-  findByCond(cond: any) {
-    return this.repository.findOne(cond);
+  findByCond(cond: LoginUserDto) {
+    return this.repository.findOne({
+      where: { email: cond.email, password: cond.password },
+    });
   }
 
   update(id: number, dto: UpdateUserDto) {

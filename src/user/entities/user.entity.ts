@@ -1,4 +1,3 @@
-import { UniqueOnDatabase } from 'src/auth/validations/unique-validation';
 import {
   Entity,
   Column,

@@ -6,6 +6,7 @@ import {
   ValidatorConstraintInterface,
 } from 'class-validator';
 import { getManager } from 'typeorm';
+import { UserEntity } from '../../user/entities/user.entity';
 
 @ValidatorConstraint({ async: true })
 export class UniqueOnDatabaseExistConstraint

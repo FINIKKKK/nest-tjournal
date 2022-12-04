@@ -14,7 +14,15 @@ export class PostService {
   ) {}
 
   create(dto: CreatePostDto) {
-    return this.repository.save(dto);
+    const firstPatagraph = dto.body.find((obj) => obj.type === 'paragraph')
+      ?.data?.text;
+
+    return this.repository.save({
+      title: dto.title,
+      body: dto.body,
+      description: firstPatagraph || '',
+      tags: dto.tags,
+    });
   }
 
   findAll() {
@@ -76,7 +84,7 @@ export class PostService {
     };
   }
 
-  async findOne(id: any) {
+  async findOne(id: number) {
     await this.repository
       .createQueryBuilder('posts')
       .whereInIds(id)
@@ -86,7 +94,11 @@ export class PostService {
       })
       .execute();
 
-    return this.repository.findOne(id);
+    return this.repository.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
   async update(id: number, dto: UpdatePostDto) {
@@ -96,7 +108,15 @@ export class PostService {
       throw new NotFoundException();
     }
 
-    return find;
+    const firstPatagraph = dto.body.find((obj) => obj.type === 'paragraph')
+      ?.data?.text;
+
+    return this.repository.update(id, {
+      title: dto.title,
+      body: dto.body,
+      description: firstPatagraph || '',
+      tags: dto.tags,
+    });
   }
 
   async remove(id: number) {
