@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
-  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -18,11 +18,11 @@ export class CommentEntity {
   @Column()
   text: string;
 
-  @ManyToMany(() => UserEntity, { nullable: false })
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: 'userId' })
   user: UserEntity;
 
-  @ManyToMany(() => PostEntity, { nullable: false })
+  @ManyToOne(() => PostEntity, { nullable: false })
   @JoinColumn({ name: 'postId' })
   post: PostEntity;
 

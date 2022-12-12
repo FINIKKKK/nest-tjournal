@@ -6,6 +6,7 @@ import { UserEntity } from './entities/user.entity';
 import { FindOneOptions, Repository } from 'typeorm';
 import { LoginUserDto } from './dto/login-user.dto';
 import { SearchUserDto } from './dto/search-user.dto';
+import { CommentEntity } from 'src/comment/entities/comment.entity';
 
 @Injectable()
 export class UserService {
@@ -13,13 +14,27 @@ export class UserService {
     @InjectRepository(UserEntity)
     private repository: Repository<UserEntity>,
   ) {}
-
+  
   create(dto: CreateUserDto) {
     return this.repository.save(dto);
   }
 
-  findAll() {
-    return this.repository.find();
+  async findAll() {
+    const arr = await this.repository
+      .createQueryBuilder('u')
+      .leftJoinAndMapMany(
+        'u.comments',
+        CommentEntity,
+        'comment',
+        'comment.userId = u.id',
+      )
+      .loadRelationCountAndMap('u.commentCount', 'u.comments', 'comments')
+      .getMany();
+
+    return arr.map((obj) => {
+      delete obj.comments;
+      return obj;
+    });
   }
 
   findById(id: number) {

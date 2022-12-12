@@ -23,20 +23,20 @@ export class PostController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@User() user: UserEntity, @Body() dto: CreatePostDto) {
-    return this.postService.create(dto);
+  create(@User() userId: number, @Body() dto: CreatePostDto) {
+    return this.postService.create(dto, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
+  update(@User() userId: number, @Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+    return this.postService.update(+id, updatePostDto, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  remove(@User() userId: number, @Param('id') id: string) {
+    return this.postService.remove(+id, userId);
   }
 
   @Get()
@@ -50,7 +50,7 @@ export class PostController {
   }
 
   @Get('/search')
-  searchPost(@Query() dto: SearchPostDto) {
+  searchPosts(@Query() dto: SearchPostDto) {
     return this.postService.search(dto);
   }
 
